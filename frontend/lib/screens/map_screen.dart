@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:net_fence_ai/models/threat_model.dart';
 import 'package:net_fence_ai/services/api_service.dart';
 import 'package:net_fence_ai/theme/app_theme.dart';
+import 'package:net_fence_ai/services/geofence_service.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -26,12 +27,20 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _loadThreats() async {
     setState(() => _loading = true);
-    final raw = await ApiService().getAllThreats();
+    // Try to get threats with location names first
+    var raw = await ApiService().getThreatsWithLocationNames();
+    if (raw.isEmpty) {
+      // Fallback to regular threats if location enriched endpoint fails
+      raw = await ApiService().getAllThreats();
+    }
     final zones = raw.map((item) => ThreatZone.fromJson(item)).toList();
     setState(() {
       _zones = zones;
       _loading = false;
     });
+
+    // Update geofences with the latest threat zones
+    await GeofenceManager().updateGeofencesFromThreatZones();
   }
 
   void _showThreatDetails(ThreatZone zone) {
@@ -74,6 +83,16 @@ class _MapScreenState extends State<MapScreen> {
               Text(zone.ssid, style: GoogleFonts.spaceGrotesk(fontSize: 22, fontWeight: FontWeight.w700, color: AppTheme.accentNavy)),
               const SizedBox(height: 10),
               Text(zone.macAddress, style: GoogleFonts.jetBrainsMono(color: AppTheme.textMuted, fontSize: 13)),
+              if (zone.locationName != null && zone.locationName!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    '📍 ${zone.locationName}',
+                    style: GoogleFonts.jetBrainsMono(color: AppTheme.accentBlue, fontSize: 12),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               const SizedBox(height: 16),
               Text('Coordinates', style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
               const SizedBox(height: 6),
@@ -110,6 +129,16 @@ class _MapScreenState extends State<MapScreen> {
         : const LatLng(12.9716, 77.5946);
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Threat Map'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadThreats,
+            tooltip: 'Refresh Geofences',
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           FlutterMap(

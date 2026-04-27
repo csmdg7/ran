@@ -7,8 +7,7 @@ import 'package:wifi_scan/wifi_scan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:net_fence_ai/services/api_service.dart';
-import 'package:net_fence_ai/services/notification_service.dart';
-import 'package:net_fence_ai/theme/app_theme.dart';
+import 'package:workmanager/workmanager.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -22,6 +21,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   bool _isScanning = false;
   bool _scanComplete = false;
   bool _threatDetected = false;
+  bool _backgroundScanningEnabled = false;
   int _networksFound = 0;
   int _scanCycle = 0;
   List<Map<String, dynamic>> _scanResults = [];
@@ -138,6 +138,37 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
     }
   }
 
+  Future<void> _toggleBackgroundScanning() async {
+    if (_backgroundScanningEnabled) {
+      // Stop background scanning
+      await Workmanager().cancelByUniqueName('wifiScanTask');
+      setState(() {
+        _backgroundScanningEnabled = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Background scanning stopped')),
+      );
+    } else {
+      // Start background scanning
+      await Workmanager().registerPeriodicTask(
+        'wifiScanTask',
+        'wifiScanTask',
+        frequency: const Duration(minutes: 15), // Scan every 15 minutes
+        initialDelay: const Duration(minutes: 1),
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+          requiresBatteryNotLow: true,
+        ),
+      );
+      setState(() {
+        _backgroundScanningEnabled = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Background scanning started - will scan every 15 minutes')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusText = _isScanning
@@ -191,6 +222,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               ),
               const SizedBox(height: 22),
               _buildScanButton(),
+              const SizedBox(height: 16),
+              _buildBackgroundScanningToggle(),
               const SizedBox(height: 26),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 400),
@@ -242,28 +275,46 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildScanButton() {
-    return GestureDetector(
-      onTap: _startScan,
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppTheme.accentNavy,
-          boxShadow: AppTheme.cardShadow,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Animate(
-            key: ValueKey(_scanCycle),
-            child: const SizedBox(
-              width: 72,
-              height: 72,
-              child: Center(
-                child: Icon(Icons.radar_rounded, color: Colors.white, size: 32),
-              ),
+  Widget _buildBackgroundScanningToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: AppTheme.cardShadow,
+        border: Border.all(color: AppTheme.cardBorder),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Background Scanning',
+                  style: GoogleFonts.spaceGrotesk(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.accentNavy,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Automatically scan every 15 minutes',
+                  style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
             ),
-          ).scale(begin: Offset(1.0, 1.0), end: Offset(1.04, 1.04), duration: 1500.ms, curve: Curves.easeInOut).then().rotate(begin: 0, end: _isScanning ? 2 * pi : 0, duration: 700.ms, curve: Curves.easeInOut),
-        ),
+          ),
+          Switch(
+            value: _backgroundScanningEnabled,
+            onChanged: (value) => _toggleBackgroundScanning(),
+            activeColor: AppTheme.accentBlue,
+          ),
+        ],
       ),
     );
   }

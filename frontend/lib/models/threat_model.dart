@@ -10,6 +10,7 @@ class ThreatZone {
   final double radiusMeters;
   final String threatType;
   final String createdAt;
+  final String? locationName;
 
   ThreatZone({
     required this.id,
@@ -20,6 +21,7 @@ class ThreatZone {
     required this.radiusMeters,
     required this.threatType,
     required this.createdAt,
+    this.locationName,
   });
 
   factory ThreatZone.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class ThreatZone {
           (json['radiusMeters'] is num ? json['radiusMeters'].toDouble() : 120.0),
       threatType: json['threat_type']?.toString() ?? json['threatType']?.toString() ?? 'unknown',
       createdAt: json['created_at']?.toString() ?? json['createdAt']?.toString() ?? '',
+      locationName: json['location_name']?.toString() ?? json['locationName']?.toString(),
     );
   }
 

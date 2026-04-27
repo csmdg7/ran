@@ -17,6 +17,9 @@ dependencies:
   geolocator: ^10.0.0
   permission_handler: ^11.0.0
   flutter_local_notifications: ^15.0.0
+  workmanager: ^0.5.2
+  geofence_service: ^3.0.0
+  geocoding: ^2.1.0
 
 flutter:
   uses-material-design: true

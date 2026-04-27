@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 import math
 from datetime import datetime
 from models.db import get_db
+from services.osm_service import OSMService
 
 alert_bp = Blueprint('alert_bp', __name__, url_prefix='/api')
 
@@ -83,7 +84,48 @@ def get_nearby_threats():
     return jsonify(nearby_threats), 200
 
 
-@alert_bp.route('', methods=['GET'])
+@alert_bp.route('/location-info', methods=['GET'])
+def get_location_info():
+    """Get detailed location information from coordinates."""
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid or missing lat/lon parameters'}), 400
+
+    location_details = OSMService.get_location_details(lat, lon)
+    return jsonify(location_details), 200
+
+
+@alert_bp.route('/threats-with-locations', methods=['GET'])
+def get_threats_with_locations():
+    """Get all threat zones with enriched location names."""
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id, ssid, latitude, longitude, radius_meters, threat_type, created_at FROM threat_zones')
+    threats = cursor.fetchall()
+
+    conn.close()
+
+    # Convert to list of dictionaries with location names
+    threat_list = []
+    for threat in threats:
+        location_name = OSMService.get_place_name(threat['latitude'], threat['longitude'])
+        
+        threat_list.append({
+            'id': threat['id'],
+            'ssid': threat['ssid'],
+            'mac_address': threat.get('mac_address', ''),
+            'latitude': threat['latitude'],
+            'longitude': threat['longitude'],
+            'radius_meters': threat['radius_meters'],
+            'threat_type': threat['threat_type'],
+            'created_at': threat['created_at'],
+            'location_name': location_name,
+        })
+
+    return jsonify(threat_list), 200
 def get_alerts():
     """Get all alerts."""
     # TODO: Implement fetch alerts from database

@@ -72,6 +72,26 @@ class ApiService {
     return <Map<String, dynamic>>[];
   }
 
+  Future<List<Map<String, dynamic>>> getAllThreatZones() async {
+    final uri = Uri.parse('$baseUrl/api/threats');
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is List) {
+          return List<Map<String, dynamic>>.from(body);
+        }
+        if (body is Map<String, dynamic> && body['threats'] is List) {
+          return List<Map<String, dynamic>>.from(body['threats'] as List);
+        }
+      }
+      print('ApiService.getAllThreatZones error: ${response.statusCode}');
+    } catch (error) {
+      print('ApiService.getAllThreatZones exception: $error');
+    }
+    return <Map<String, dynamic>>[];
+  }
+
   Future<Map<String, dynamic>> uploadScan({
     required String ssid,
     required String macAddress,
@@ -115,5 +135,39 @@ class ApiService {
       print('ApiService.checkHealth exception: $error');
       return false;
     }
+  }
+
+  Future<Map<String, dynamic>> getLocationInfo(double latitude, double longitude) async {
+    final uri = Uri.parse('$baseUrl/api/location-info?lat=$latitude&lon=$longitude');
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      print('ApiService.getLocationInfo error: ${response.statusCode}');
+    } catch (error) {
+      print('ApiService.getLocationInfo exception: $error');
+    }
+    return <String, dynamic>{};
+  }
+
+  Future<List<Map<String, dynamic>>> getThreatsWithLocationNames() async {
+    final uri = Uri.parse('$baseUrl/api/threats-with-locations');
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is List) {
+          return List<Map<String, dynamic>>.from(body);
+        }
+        if (body is Map<String, dynamic> && body['threats'] is List) {
+          return List<Map<String, dynamic>>.from(body['threats'] as List);
+        }
+      }
+      print('ApiService.getThreatsWithLocationNames error: ${response.statusCode}');
+    } catch (error) {
+      print('ApiService.getThreatsWithLocationNames exception: $error');
+    }
+    return <Map<String, dynamic>>[];
   }
 }

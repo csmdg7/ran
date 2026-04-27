@@ -40,7 +40,12 @@ class _ThreatsScreenState extends State<ThreatsScreen> {
       _loading = true;
       _error = false;
     });
-    final raw = await ApiService().getAllThreats();
+    // Try to get threats with location names first
+    var raw = await ApiService().getThreatsWithLocationNames();
+    if (raw.isEmpty) {
+      // Fallback to regular threats if location enriched endpoint fails
+      raw = await ApiService().getAllThreats();
+    }
     if (raw.isEmpty) {
       setState(() {
         _loading = false;
@@ -286,6 +291,16 @@ class _ThreatCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(zone.macAddress, style: GoogleFonts.jetBrainsMono(color: AppTheme.textMuted, fontSize: 12)),
+          if (zone.locationName != null && zone.locationName!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                '📍 ${zone.locationName}',
+                style: GoogleFonts.jetBrainsMono(color: AppTheme.accentBlue, fontSize: 11),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           const SizedBox(height: 12),
           Row(
             children: [
