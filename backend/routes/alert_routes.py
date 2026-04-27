@@ -48,7 +48,8 @@ def get_nearby_threats():
     try:
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
-        radius_km = float(request.args.get('radius_km', 1.0))
+        radius_value = request.args.get('radius') or request.args.get('radius_km') or '1.0'
+        radius_km = float(radius_value)
     except (TypeError, ValueError):
         return jsonify({'error': 'Invalid or missing lat/lon parameters'}), 400
 

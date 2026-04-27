@@ -1,3 +1,4 @@
+
 # Install: pip install pywifi comtypes (Windows) or pip install pywifi (Linux/Mac)
 
 import time

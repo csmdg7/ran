@@ -1,0 +1,22 @@
+name: net_fence_ai
+description: Net-Fence AI - Intelligent Network Intrusion Detection System. Advanced Wi-Fi threat detection using Isolation Forest ML with real-time Evil Twin protection.
+publish_to: 'none'
+environment:
+  sdk: '>=2.19.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.5
+  google_fonts: ^5.0.0
+  flutter_animate: ^4.0.0
+  flutter_map: ^5.0.0
+  latlong2: ^0.9.0
+  http: ^1.6.0
+  wifi_scan: ^0.4.0
+  geolocator: ^10.0.0
+  permission_handler: ^11.0.0
+  flutter_local_notifications: ^15.0.0
+
+flutter:
+  uses-material-design: true
