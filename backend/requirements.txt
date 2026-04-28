@@ -5,3 +5,7 @@ numpy
 pandas
 gunicorn
 requests
+flask-limiter
+cryptography
+python-dotenv
+marshmallow
