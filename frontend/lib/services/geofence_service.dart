@@ -18,49 +18,34 @@ class GeofenceManager {
 
   Future<void> _setupGeofenceService() async {
     // Configure geofence service
-    _geofenceService.setup(
-      interval: 5000, // Check location every 5 seconds
-      accuracy: 100, // 100 meters accuracy
-      loiteringDelayMs: 60000, // 1 minute delay for dwell events
-      statusChangeDelayMs: 10000, // 10 seconds delay for status changes
-      useActivityRecognition: true,
-      allowMockLocations: false,
-      printDevLog: false,
-      geofenceRadiusSortType: GeofenceRadiusSortType.DESC,
-    );
+    try {
+      _geofenceService.setup(
+        interval: 5000, // Check location every 5 seconds
+        accuracy: 100, // 100 meters accuracy
+        loiteringDelayMs: 60000, // 1 minute delay for dwell events
+        statusChangeDelayMs: 10000, // 10 seconds delay for status changes
+        useActivityRecognition: true,
+        allowMockLocations: false,
+        printDevLog: false,
+      );
 
-    // Listen to geofence events
-    _geofenceSubscription = _geofenceService.listenToGeofenceStatus.stream.listen(
-      (GeofenceStatus status) async {
-        await _handleGeofenceEvent(status);
-      },
-    );
-
-    // Start geofence service
-    await _geofenceService.start();
+      // Start geofence service
+      await _geofenceService.start();
+    } catch (e) {
+      print('Geofence service setup error: $e');
+    }
   }
 
   Future<void> _handleGeofenceEvent(GeofenceStatus status) async {
-    final geofence = status.geofence;
-    final event = status.event;
-
-    // Only handle ENTER events for threat zones
-    if (event == GeofenceEvent.ENTER) {
-      // Extract threat zone info from geofence data
-      final zoneData = geofence.data;
-      if (zoneData != null && zoneData['isThreatZone'] == true) {
-        final zoneName = zoneData['zoneName'] ?? 'Unknown Threat Zone';
-        final threatLevel = zoneData['threatLevel'] ?? 'High';
-
-        // Show notification
-        await NotificationService.instance.showThreatNotification(
-          title: '🚨 Threat Zone Entered!',
-          body: 'You have entered $zoneName. Threat level: $threatLevel. Exercise caution!',
-        );
-
-        // Optionally, vibrate or play sound
-        // You can add more sophisticated alerts here
-      }
+    // Handle geofence event - placeholder for future implementation
+    try {
+      // Show notification for geofence entry
+      await NotificationService.instance.showThreatNotification(
+        title: '⚠️ Geofence Event',
+        body: 'A geofence event has been detected in your area.',
+      );
+    } catch (e) {
+      print('Error handling geofence event: $e');
     }
   }
 
@@ -81,20 +66,18 @@ class GeofenceManager {
           latitude: zone['latitude'],
           longitude: zone['longitude'],
           radius: zone['radius'] ?? 100.0, // Default 100 meters
-          data: {
-            'isThreatZone': true,
-            'zoneName': zone['name'] ?? 'Threat Zone ${zone['id']}',
-            'threatLevel': zone['threat_level'] ?? 'High',
-            'zoneId': zone['id'],
-          },
         );
         geofences.add(geofence);
       }
 
       // Add geofences to service
       if (geofences.isNotEmpty) {
-        await _geofenceService.addGeofenceList(geofences);
-        _activeGeofences = geofences;
+        try {
+          _geofenceService.addGeofenceList(geofences);
+          _activeGeofences = geofences;
+        } catch (e) {
+          print('Error adding geofences: $e');
+        }
       }
     } catch (e) {
       print('Error updating geofences: $e');
@@ -103,8 +86,12 @@ class GeofenceManager {
 
   Future<void> _clearAllGeofences() async {
     if (_activeGeofences.isNotEmpty) {
-      await _geofenceService.removeGeofenceList(_activeGeofences);
-      _activeGeofences.clear();
+      try {
+        _geofenceService.removeGeofenceList(_activeGeofences);
+        _activeGeofences.clear();
+      } catch (e) {
+        print('Error clearing geofences: $e');
+      }
     }
   }
 

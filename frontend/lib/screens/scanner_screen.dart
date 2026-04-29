@@ -1,7 +1,9 @@
+import 'package:net_fence_ai/theme/app_theme.dart';
+import 'package:net_fence_ai/services/notification_service.dart';
+
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:geolocator/geolocator.dart';
@@ -23,7 +25,6 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   bool _threatDetected = false;
   bool _backgroundScanningEnabled = false;
   int _networksFound = 0;
-  int _scanCycle = 0;
   List<Map<String, dynamic>> _scanResults = [];
 
   @override
@@ -57,7 +58,6 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       _isScanning = true;
       _scanComplete = false;
       _scanResults = [];
-      _scanCycle++;
     });
 
     try {
@@ -82,7 +82,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       for (final ap in accessPoints) {
         // Send each network to backend for AI analysis
         final response = await ApiService().uploadScan(
-          ssid: ap.ssid ?? 'Unknown',
+          ssid: ap.ssid,
           macAddress: ap.bssid,
           encryptionType: ap.capabilities.contains('WPA') ? 'WPA2' :
                          ap.capabilities.contains('WEP') ? 'WEP' : 'Open',
@@ -95,7 +95,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         if (isThreat) threatsDetected++;
 
         results.add({
-          'ssid': ap.ssid ?? 'Hidden Network',
+          'ssid': ap.ssid,
           'bssid': ap.bssid,
           'status': isThreat ? 'threat' : 'safe',
           'encryption': ap.capabilities.contains('WPA') ? 'WPA2' :
@@ -223,7 +223,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               const SizedBox(height: 22),
               _buildScanButton(),
               const SizedBox(height: 16),
-              _buildBackgroundScanningToggle(),
+              if (_backgroundScanningEnabled)
+                _buildBackgroundScanningToggle()
               const SizedBox(height: 26),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 400),
@@ -269,6 +270,40 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScanButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppTheme.accentBlue.withOpacity(0.8), AppTheme.accentBlue],
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: AppTheme.cardShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _isScanning ? null : _startScan,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text(
+                _isScanning ? 'Scanning...' : 'Start Scan',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
           ),
         ),
       ),

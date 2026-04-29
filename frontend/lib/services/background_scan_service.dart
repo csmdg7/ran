@@ -71,7 +71,8 @@ class BackgroundScanService {
         if (result['threat_detected'] == true) {
           // Show notification for detected threat
           await NotificationService.instance.showThreatNotification(
-            result['threat_details'] ?? 'Unknown threat detected',
+            title: 'Threat Detected',
+            body: result['threat_details'] ?? 'Unknown threat detected',
           );
         }
 
