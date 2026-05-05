@@ -21,21 +21,28 @@ def scan_upload():
         return jsonify({'error': 'missing fields'}), 400
 
     # --- RUN YOUR AI BRAIN ---
-    # Convert 'Open' strings to 1/0 for your model
-    is_open_val = 1 if data['encryption_type'].lower() == 'open' else 0
-    
-    # Analyze using your Isolation Forest + MAC Check
-    ai_result = net_ai.analyze_network(
-        signal=data['signal_strength'],
-        is_open=is_open_val,
-        is_duplicate=0, # Defaulting to 0 for single scan
-        mac=data['mac_address'],
-        vendor=data.get('vendor', 'Unknown')
-    )
-    
-    # Determine if it's a threat based on your AI 'level'
-    is_threat = True if ai_result['level'] in ['High', 'Medium'] else False
-    threat_type = ai_result['alert']
+    try:
+        # Convert 'Open' strings to 1/0 for your model
+        is_open_val = 1 if data['encryption_type'].lower() == 'open' else 0
+        
+        # Analyze using your Isolation Forest + MAC Check
+        ai_result = net_ai.analyze_network(
+            signal=data['signal_strength'],
+            is_open=is_open_val,
+            is_duplicate=0, # Defaulting to 0 for single scan
+            mac=data['mac_address'],
+            vendor=data.get('vendor', 'Unknown')
+        )
+        
+        # Determine if it's a threat based on your AI 'level' (CRITICAL, WARNING, SAFE)
+        is_threat = True if ai_result['level'] in ['CRITICAL', 'WARNING'] else False
+        threat_type = ai_result['level']  # Use level directly as threat type
+        ai_score = ai_result['score']
+    except Exception as e:
+        print(f"Error in AI analysis: {e}")
+        is_threat = False
+        threat_type = 'ERROR'
+        ai_score = 0
     # ---------------------------
 
     # Add timestamp
@@ -85,8 +92,9 @@ def scan_upload():
         'received': True,
         'threat_detected': is_threat,
         'threat_type': threat_type,
-        'ai_score': ai_result['score'],
-        'scan_id': scan_id
+        'ai_score': ai_score,
+        'scan_id': scan_id,
+        'message': 'Scan processed successfully'
     }), 200
 
 @scan_bp.route('/health', methods=['GET'])

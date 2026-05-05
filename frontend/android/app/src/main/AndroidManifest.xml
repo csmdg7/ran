@@ -1,11 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- Wi-Fi scanning -->    cd c:\Users\Chetana\NET_FENCE_AI\Net_Fence_AI\frontend
-    flutter pub get
-    flutter build apk --debug
+    <!-- Wi-Fi scanning -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
@@ -60,4 +59,4 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
-</manifest>
+</manifest> 

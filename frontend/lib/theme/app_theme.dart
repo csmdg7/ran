@@ -41,7 +41,7 @@ class AppTheme {
       highlightColor: Colors.transparent,
       splashFactory: NoSplash.splashFactory,
       textSelectionTheme: const TextSelectionThemeData(cursorColor: accentNavy),
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         surface: surface,
         primary: accentNavy,
         secondary: accentBlue,

@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         size: 38,
                         color: AppTheme.accentNavy,
                       ),
-                    ).animate().fadeIn(duration: 700.ms).scale(begin: Offset(0.7, 0.7), end: Offset(1.0, 1.0), duration: 700.ms, curve: Curves.easeOut),
+                    ).animate().fadeIn(duration: 700.ms).scale(begin: const Offset(0.7, 0.7), end: const Offset(1.0, 1.0), duration: 700.ms, curve: Curves.easeOut),
                   ),
                   const SizedBox(height: 24),
                   Row(
@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'Intelligent Network Intrusion Detection System',
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
                       letterSpacing: 0.8,
                       height: 1.4,
@@ -124,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'Advanced Wi-Fi Threat Detection with Isolation Forest ML',
                     style: GoogleFonts.inter(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 11,
                       letterSpacing: 0.5,
                       height: 1.3,
@@ -147,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: Container(
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                       child: Align(

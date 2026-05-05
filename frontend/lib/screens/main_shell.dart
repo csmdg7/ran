@@ -68,10 +68,10 @@ class _MainShellState extends State<MainShell> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: AppTheme.divider, width: 1)),
+          border: const Border(top: BorderSide(color: AppTheme.divider, width: 1)),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.accentNavy.withOpacity(0.08),
+              color: AppTheme.accentNavy.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),

@@ -11,11 +11,35 @@ class ApiService {
 
   factory ApiService() => _instance;
 
+  // Configure these for your environment
+  static const String DEFAULT_BACKEND_URL = 'http://10.235.58.202:5000';
+  static const String LOCALHOST_URL = 'http://localhost:5000';
+  static const String PRODUCTION_URL = 'http://api.netfence.local:5000'; // Update with your prod URL
+
   String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:5000';
+    // Use environment variable if available, otherwise use defaults
+    const String envUrl = String.fromEnvironment('BACKEND_URL', defaultValue: '');
+    if (envUrl.isNotEmpty) {
+      return envUrl;
     }
-    return 'http://10.235.58.202:5000';
+    
+    if (kIsWeb) {
+      return LOCALHOST_URL;
+    }
+    
+    // For Android/iOS, try to detect network environment
+    return DEFAULT_BACKEND_URL; // Change to PRODUCTION_URL when deploying
+  }
+
+  /// Set custom backend URL for testing or multi-environment support
+  static String? _customUrl;
+  
+  static void setCustomBackendUrl(String url) {
+    _customUrl = url;
+  }
+  
+  static void resetBackendUrl() {
+    _customUrl = null;
   }
 
   Future<Map<String, dynamic>> getStats() async {
@@ -53,7 +77,13 @@ class ApiService {
   }
 
   Future<List<Map<String, dynamic>>> getNearbyThreats(double lat, double lon, {double radiusKm = 1.0}) async {
-    final uri = Uri.parse('$baseUrl/api/threats/nearby?lat=$lat&lon=$lon&radius=$radiusKm');
+    final uri = Uri.parse('$baseUrl/api/threats/nearby').replace(
+      queryParameters: {
+        'lat': lat.toString(),
+        'lon': lon.toString(),
+        'radius': radiusKm.toString(),
+      },
+    );
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {

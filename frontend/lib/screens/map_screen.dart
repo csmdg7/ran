@@ -161,8 +161,8 @@ class _MapScreenState extends State<MapScreen> {
                         point: LatLng(zone.latitude, zone.longitude),
                         radius: zone.radiusMeters / 30,
                         useRadiusInMeter: false,
-                        color: AppTheme.threatRed.withOpacity(0.15),
-                        borderColor: AppTheme.threatRed.withOpacity(0.8),
+                        color: AppTheme.threatRed.withValues(alpha: 0.15),
+                        borderColor: AppTheme.threatRed.withValues(alpha: 0.8),
                         borderStrokeWidth: 2,
                       ),
                     )
@@ -184,7 +184,7 @@ class _MapScreenState extends State<MapScreen> {
                                 color: AppTheme.threatRed,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.threatRed.withOpacity(0.3),
+                                    color: AppTheme.threatRed.withValues(alpha: 0.3),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -208,7 +208,7 @@ class _MapScreenState extends State<MapScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.82),
+                color: Colors.white.withValues(alpha: 0.82),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppTheme.cardBorder),
                 boxShadow: AppTheme.cardShadow,
@@ -242,7 +242,7 @@ class _MapScreenState extends State<MapScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.88),
+                color: Colors.white.withValues(alpha: 0.88),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppTheme.cardBorder),
                 boxShadow: AppTheme.cardShadow,
@@ -274,7 +274,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           if (_loading)
             Container(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               child: const Center(
                 child: CircularProgressIndicator(color: AppTheme.accentBlue),
               ),

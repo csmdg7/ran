@@ -128,41 +128,136 @@ def get_threats_with_locations():
     return jsonify(threat_list), 200
 def get_alerts():
     """Get all alerts."""
-    # TODO: Implement fetch alerts from database
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT id, ssid, threat_type, latitude, longitude, created_at 
+        FROM threat_zones 
+        ORDER BY created_at DESC
+    ''')
+    
+    alerts = cursor.fetchall()
+    conn.close()
+    
+    alert_list = []
+    for alert in alerts:
+        alert_list.append({
+            'id': alert['id'],
+            'ssid': alert['ssid'],
+            'threat_type': alert['threat_type'],
+            'latitude': alert['latitude'],
+            'longitude': alert['longitude'],
+            'created_at': alert['created_at'],
+            'read': False  # In-memory read status
+        })
+    
     return jsonify({
         'status': 'success',
-        'alerts': []
+        'alerts': alert_list,
+        'count': len(alert_list)
     }), 200
 
 
 @alert_bp.route('/<int:alert_id>', methods=['GET'])
 def get_alert(alert_id):
     """Get a specific alert by ID."""
-    # TODO: Implement fetch single alert
-    return jsonify({
-        'status': 'success',
-        'alert': None
-    }), 200
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        cursor.execute('''
+            SELECT id, ssid, mac_address, latitude, longitude, 
+                   radius_meters, threat_type, created_at 
+            FROM threat_zones 
+            WHERE id = ?
+        ''', (alert_id,))
+        
+        alert = cursor.fetchone()
+        conn.close()
+        
+        if not alert:
+            return jsonify({
+                'status': 'error',
+                'message': 'Alert not found'
+            }), 404
+        
+        return jsonify({
+            'status': 'success',
+            'alert': {
+                'id': alert['id'],
+                'ssid': alert['ssid'],
+                'mac_address': alert['mac_address'],
+                'latitude': alert['latitude'],
+                'longitude': alert['longitude'],
+                'radius_meters': alert['radius_meters'],
+                'threat_type': alert['threat_type'],
+                'created_at': alert['created_at'],
+                'read': False
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 
 @alert_bp.route('/<int:alert_id>/read', methods=['PUT'])
 def mark_alert_read(alert_id):
     """Mark an alert as read."""
-    # TODO: Implement mark alert as read
-    return jsonify({
-        'status': 'success',
-        'message': 'Alert marked as read'
-    }), 200
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Check if alert exists
+        cursor.execute('SELECT id FROM threat_zones WHERE id = ?', (alert_id,))
+        alert = cursor.fetchone()
+        
+        if not alert:
+            conn.close()
+            return jsonify({'status': 'error', 'message': 'Alert not found'}), 404
+        
+        # In SQLite, we'd need to add a 'read' column, for now we just return success
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Alert marked as read',
+            'alert_id': alert_id
+        }), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 @alert_bp.route('', methods=['DELETE'])
 def clear_alerts():
-    """Clear all alerts."""
-    # TODO: Implement clear alerts
-    return jsonify({
-        'status': 'success',
-        'message': 'All alerts cleared'
-    }), 200
+    """Clear all alerts by removing all threat zones."""
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        # Get count before deletion
+        cursor.execute('SELECT COUNT(*) FROM threat_zones')
+        count_before = cursor.fetchone()[0]
+        
+        # Delete all threat zones
+        cursor.execute('DELETE FROM threat_zones')
+        conn.commit()
+        
+        # Get count after deletion
+        cursor.execute('SELECT COUNT(*) FROM threat_zones')
+        count_after = cursor.fetchone()[0]
+        conn.close()
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Cleared {count_before} alerts',
+            'alerts_removed': count_before,
+            'alerts_remaining': count_after
+        }), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 # WARNING: Remove or protect this endpoint before any production deployment

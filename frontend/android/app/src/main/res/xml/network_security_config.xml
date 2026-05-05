@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow cleartext (HTTP) traffic for development backend communication -->
+    <!-- WARNING: This is only for development/testing. Remove for production! -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Local backend IP (adjust as needed) -->
+        <domain includeSubdomains="true">10.235.58.202</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+    
+    <!-- All other traffic must use HTTPS -->
+    <default-config cleartextTrafficPermitted="false" />
+</network-security-config>

@@ -254,7 +254,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return cards[index]
             .animate()
             .fadeIn(duration: 500.ms, delay: Duration(milliseconds: 80 * index))
-            .scale(begin: Offset(0.9, 0.9), end: Offset(1.0, 1.0), duration: 500.ms, curve: Curves.easeOut);
+            .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.0, 1.0), duration: 500.ms, curve: Curves.easeOut);
       },
     );
   }
@@ -282,7 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   color: AppTheme.accentBlueLight,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text('${_totalThreats} total', style: const TextStyle(color: AppTheme.accentBlue, fontSize: 12, fontWeight: FontWeight.w700)),
+                child: Text('$_totalThreats total', style: const TextStyle(color: AppTheme.accentBlue, fontSize: 12, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -306,7 +306,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         decoration: BoxDecoration(
-                          color: typeColor.withOpacity(0.1),
+                          color: typeColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: Text(
@@ -326,7 +326,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         widthFactor: progress,
                         child: Container(
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: [typeColor.withOpacity(0.9), AppTheme.warningAmber.withOpacity(0.6)]),
+                            gradient: LinearGradient(colors: [typeColor.withValues(alpha: 0.9), AppTheme.warningAmber.withValues(alpha: 0.6)]),
                           ),
                         ),
                       ).animate().fadeIn(duration: 500.ms).slideX(begin: -0.4, end: 0, duration: 500.ms),
@@ -335,7 +335,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -365,9 +365,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppTheme.threatRedLight,
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
             ),
             child: Row(
               children: [
@@ -376,7 +376,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.threatRed.withOpacity(0.12),
+                    color: AppTheme.threatRed.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Text(threatType.replaceAll('_', ' ').toUpperCase(), style: const TextStyle(color: AppTheme.threatRed, fontSize: 12, fontWeight: FontWeight.w700)),

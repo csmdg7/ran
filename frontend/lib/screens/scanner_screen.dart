@@ -4,6 +4,7 @@ import 'package:net_fence_ai/services/notification_service.dart';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wifi_scan/wifi_scan.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,9 +73,32 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       final accessPoints = await WiFiScan.instance.getScannedResults();
 
       // Get current location
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      late Position position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      } on LocationServiceDisabledException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location service disabled: $e')),
+          );
+        }
+        setState(() {
+          _isScanning = false;
+        });
+        return;
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location error: $e')),
+          );
+        }
+        setState(() {
+          _isScanning = false;
+        });
+        return;
+      }
 
       final results = <Map<String, dynamic>>[];
       int threatsDetected = 0;
@@ -139,6 +163,14 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   }
 
   Future<void> _toggleBackgroundScanning() async {
+    if (kIsWeb) {
+      // Background scanning not supported on web
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Background scanning not available on web')),
+      );
+      return;
+    }
+
     if (_backgroundScanningEnabled) {
       // Stop background scanning
       await Workmanager().cancelByUniqueName('wifiScanTask');
@@ -224,7 +256,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               _buildScanButton(),
               const SizedBox(height: 16),
               if (_backgroundScanningEnabled)
-                _buildBackgroundScanningToggle()
+                _buildBackgroundScanningToggle(),
               const SizedBox(height: 26),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 400),
@@ -265,7 +297,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
                         child: const Text('⚠ Threat Detected on this scan', style: TextStyle(color: AppTheme.threatRed, fontWeight: FontWeight.w700)),
                       ),
                     const SizedBox(height: 16),
-                    ..._scanResults.map((network) => _buildResultRow(network)).toList(),
+                    ..._scanResults.map((network) => _buildResultRow(network)),
                   ],
                 ),
               ),
@@ -281,7 +313,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppTheme.accentBlue.withOpacity(0.8), AppTheme.accentBlue],
+          colors: [AppTheme.accentBlue.withValues(alpha: 0.8), AppTheme.accentBlue],
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: AppTheme.cardShadow,
@@ -347,7 +379,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
           Switch(
             value: _backgroundScanningEnabled,
             onChanged: (value) => _toggleBackgroundScanning(),
-            activeColor: AppTheme.accentBlue,
+            activeThumbColor: AppTheme.accentBlue,
           ),
         ],
       ),
@@ -380,7 +412,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: dotColor.withOpacity(0.12),
+                  color: dotColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Text(pillText, style: TextStyle(color: dotColor, fontSize: 12, fontWeight: FontWeight.w700)),
@@ -429,13 +461,13 @@ class RadarPainter extends CustomPainter {
     final opacities = [0.08, 0.12, 0.16, 0.22];
     for (var i = 0; i < 4; i++) {
       paint
-        ..color = AppTheme.accentBlue.withOpacity(opacities[i])
+        ..color = AppTheme.accentBlue.withValues(alpha: opacities[i])
         ..strokeWidth = 1.4;
       canvas.drawCircle(center, radius * ((4 - i) / 4), paint);
     }
 
     paint
-      ..color = AppTheme.accentBlue.withOpacity(0.08)
+      ..color = AppTheme.accentBlue.withValues(alpha: 0.08)
       ..strokeWidth = 1;
     canvas.drawLine(Offset(center.dx - radius, center.dy), Offset(center.dx + radius, center.dy), paint);
     canvas.drawLine(Offset(center.dx, center.dy - radius), Offset(center.dx, center.dy + radius), paint);
@@ -445,7 +477,7 @@ class RadarPainter extends CustomPainter {
       ..shader = SweepGradient(
         startAngle: sweepAngle - pi / 6,
         endAngle: sweepAngle,
-        colors: [AppTheme.accentBlue.withOpacity(0.0), AppTheme.accentBlue.withOpacity(0.5)],
+        colors: [AppTheme.accentBlue.withValues(alpha: 0.0), AppTheme.accentBlue.withValues(alpha: 0.5)],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawArc(Rect.fromCircle(center: center, radius: radius), sweepAngle - pi / 6, pi / 6, true, sweepPaint);
 
@@ -458,7 +490,7 @@ class RadarPainter extends CustomPainter {
       for (final position in blipPositions) {
         final dotPaint = Paint()..color = AppTheme.accentBlue;
         canvas.drawCircle(position, 8, dotPaint);
-        canvas.drawCircle(position, 10, Paint()..style = PaintingStyle.stroke..color = AppTheme.accentBlue.withOpacity(0.18)..strokeWidth = 2);
+        canvas.drawCircle(position, 10, Paint()..style = PaintingStyle.stroke..color = AppTheme.accentBlue.withValues(alpha: 0.18)..strokeWidth = 2);
       }
     }
   }

@@ -135,7 +135,7 @@ class _ThreatsScreenState extends State<ThreatsScreen> {
                             padding: const EdgeInsets.only(bottom: 16),
                             child: _ThreatCard(zone: zone).animate().fadeIn(duration: 500.ms, delay: Duration(milliseconds: 60 * index)).slideY(begin: 24, end: 0, duration: 500.ms, curve: Curves.easeOut),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),
@@ -236,7 +236,7 @@ class _ThreatCard extends StatelessWidget {
   Color get _pillColor {
     switch (zone.threatType.toLowerCase()) {
       case 'evil_twin':
-        return AppTheme.threatRed.withOpacity(0.12);
+        return AppTheme.threatRed.withValues(alpha: 0.12);
       case 'mac_spoof':
         return AppTheme.warningAmberLight;
       case 'open_network':
