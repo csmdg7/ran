@@ -46,3 +46,8 @@ ios/Podfile.lock
 .DS_Store
 .idea/
 *.iml
+
+# Ignore all markdown docs except root README
+*.md
+!README.md
+
