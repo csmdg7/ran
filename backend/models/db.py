@@ -22,15 +22,29 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             ssid TEXT,
             mac_address TEXT,
+            vendor TEXT,
             encryption_type TEXT,
             signal_strength INTEGER,
             latitude REAL,
             longitude REAL,
             timestamp TEXT,
-            is_flagged INTEGER DEFAULT 0
+            is_flagged INTEGER DEFAULT 0,
+            ai_score INTEGER DEFAULT 0,
+            alert_text TEXT
         )
     ''')
     
+    # Add missing columns if database already exists
+    def _add_column_if_missing(table, column_def):
+        try:
+            cursor.execute(f'ALTER TABLE {table} ADD COLUMN {column_def}')
+        except Exception:
+            pass
+
+    _add_column_if_missing('network_scans', 'vendor TEXT')
+    _add_column_if_missing('network_scans', 'ai_score INTEGER DEFAULT 0')
+    _add_column_if_missing('network_scans', 'alert_text TEXT')
+
     # Create threat_zones table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS threat_zones (

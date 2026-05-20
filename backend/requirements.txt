@@ -9,3 +9,5 @@ flask-limiter
 cryptography
 python-dotenv
 marshmallow
+pywifi
+comtypes

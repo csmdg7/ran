@@ -22,7 +22,7 @@ def get_threats():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT id, ssid, latitude, longitude, radius_meters, threat_type, created_at FROM threat_zones')
+    cursor.execute('SELECT id, ssid, mac_address, latitude, longitude, radius_meters, threat_type, created_at FROM threat_zones')
     threats = cursor.fetchall()
 
     conn.close()
@@ -33,6 +33,7 @@ def get_threats():
         threat_list.append({
             'id': threat['id'],
             'ssid': threat['ssid'],
+            'mac_address': threat['mac_address'],
             'latitude': threat['latitude'],
             'longitude': threat['longitude'],
             'radius_meters': threat['radius_meters'],
@@ -103,7 +104,7 @@ def get_threats_with_locations():
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT id, ssid, latitude, longitude, radius_meters, threat_type, created_at FROM threat_zones')
+    cursor.execute('SELECT id, ssid, mac_address, latitude, longitude, radius_meters, threat_type, created_at FROM threat_zones')
     threats = cursor.fetchall()
 
     conn.close()
@@ -126,6 +127,7 @@ def get_threats_with_locations():
         })
 
     return jsonify(threat_list), 200
+@alert_bp.route('/alerts', methods=['GET'])
 def get_alerts():
     """Get all alerts."""
     conn = get_db()
@@ -309,6 +311,16 @@ def get_stats():
     cursor.execute('SELECT COUNT(*) FROM threat_zones')
     total_threats = cursor.fetchone()[0]
 
+    # Safe networks = total scans - total threats
+    safe_networks = max(0, total_scans - total_threats)
+
+    # Active threat zones (unique locations with threats)
+    cursor.execute(
+        'SELECT COUNT(*) FROM (SELECT latitude, longitude FROM threat_zones GROUP BY latitude, longitude)'
+    )
+    active_zones_result = cursor.fetchone()
+    active_zones = active_zones_result[0] if active_zones_result else 0
+
     # Threat breakdown
     cursor.execute('SELECT threat_type, COUNT(*) FROM threat_zones GROUP BY threat_type')
     threat_rows = cursor.fetchall()
@@ -331,7 +343,9 @@ def get_stats():
 
     return jsonify({
         'total_scans': total_scans,
-        'total_threats': total_threats,
+        'threats_found': total_threats,
+        'safe_networks': safe_networks,
+        'active_zones': active_zones,
         'threat_breakdown': threat_breakdown,
         'latest_threat': latest_threat
     }), 200

@@ -5,6 +5,59 @@ import time
 import requests
 from pywifi import PyWiFi, const, Profile
 
+VENDOR_OUI = {
+    '00:0A:95': 'Apple',
+    '00:14:22': 'Dell',
+    '00:40:96': 'Cisco',
+    '00:1A:70': 'Apple',
+    '00:26:5E': 'Apple',
+    '00:50:F4': 'Linksys',
+    '00:1F:E2': 'Ubiquiti',
+    '00:17:3F': 'Netgear',
+    '00:22:B0': 'TP-Link',
+    '00:25:86': 'TP-Link',
+    '00:1D:7E': 'Asus',
+    '00:19:DB': 'Asus',
+    '00:12:17': 'NETGEAR',
+    '00:06:5B': 'Netgate',
+    '00:04:9F': 'Cisco',
+    '00:60:B0': 'Cisco',
+    '00:0C:F6': 'Linksys',
+}
+
+def resolve_vendor(mac_address):
+    if not mac_address:
+        return 'Unknown'
+    prefix = mac_address.strip().upper().replace('-', ':')[:8]
+    return VENDOR_OUI.get(prefix, 'Unknown')
+
+VENDOR_OUI = {
+    '00:0A:95': 'Apple',
+    '00:14:22': 'Dell',
+    '00:40:96': 'Cisco',
+    '00:1A:70': 'Apple',
+    '00:26:5E': 'Apple',
+    '00:50:F4': 'Linksys',
+    '00:1F:E2': 'Ubiquiti',
+    '00:17:3F': 'Netgear',
+    '00:22:B0': 'TP-Link',
+    '00:25:86': 'TP-Link',
+    '00:1D:7E': 'Asus',
+    '00:19:DB': 'Asus',
+    '00:12:17': 'NETGEAR',
+    '00:06:5B': 'Netgate',
+    '00:04:9F': 'Cisco',
+    '00:60:B0': 'Cisco',
+    '00:0C:F6': 'Linksys',
+}
+
+def resolve_vendor(mac_address):
+    if not mac_address:
+        return 'Unknown'
+    prefix = mac_address.strip().upper().replace('-', ':')[:8]
+    return VENDOR_OUI.get(prefix, 'Unknown')
+
+
 def scan_and_upload():
     wifi = PyWiFi()
     iface = wifi.interfaces()[0]  # Use the first interface
@@ -26,9 +79,11 @@ def scan_and_upload():
 
         mac_address = network.bssid.upper()  # Format as AA:BB:CC:DD:EE:FF
 
-        # Determine encryption type from akm
+        # Determine encryption type from AKM list
         akm_list = network.akm
-        if const.AKM_TYPE_WPA2PSK in akm_list:
+        if getattr(const, 'AKM_TYPE_WPA3', None) in akm_list:
+            encryption_type = "WPA3"
+        elif const.AKM_TYPE_WPA2PSK in akm_list:
             encryption_type = "WPA2"
         elif const.AKM_TYPE_WPAPSK in akm_list:
             encryption_type = "WPA"
@@ -38,11 +93,13 @@ def scan_and_upload():
             encryption_type = "WEP"
 
         signal_strength = network.signal  # Raw signal value
+        vendor = resolve_vendor(mac_address)
 
         # Prepare data
         data = {
             "ssid": ssid,
             "mac_address": mac_address,
+            "vendor": vendor,
             "encryption_type": encryption_type,
             "signal_strength": signal_strength,
             "latitude": latitude,

@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.net_fence_ai_frontend"
-    compileSdk = 35  // Latest stable SDK (Android 15)
+    compileSdk = 36  // Updated for plugin compatibility
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -51,7 +51,7 @@ android {
         buildConfig = true
         aidl = false
         renderScript = false
-        resValues = false
+        resValues = true
         shaders = false
     }
 

@@ -11,6 +11,9 @@ app = Flask(__name__)
 # Enable CORS for all routes (allows Flutter app to call the API)
 CORS(app)
 
+# Initialize database on startup
+init_db()
+
 # Register blueprints
 app.register_blueprint(scan_bp)
 app.register_blueprint(alert_bp)
