@@ -26,6 +26,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   bool _threatDetected = false;
   bool _backgroundScanningEnabled = false;
   int _networksFound = 0;
+  String _scanLocation = 'Unknown';
+  String _scanTimestamp = '';
   List<Map<String, dynamic>> _scanResults = [];
 
   @override
@@ -43,6 +45,13 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
 
   Future<void> _startScan() async {
     if (_isScanning) return;
+
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Wi-Fi scanning is not supported on web. Use a mobile device or backend test client.')),
+      );
+      return;
+    }
 
     // Request permissions
     final locationStatus = await Permission.location.request();
@@ -102,14 +111,18 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
 
       final results = <Map<String, dynamic>>[];
       int threatsDetected = 0;
+      final locationString = '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}';
+      final timestampString = DateTime.now().toLocal().toIso8601String();
 
       for (final ap in accessPoints) {
-        // Send each network to backend for AI analysis
+        final encryptionType = _parseEncryption(ap.capabilities);
+        final vendor = _resolveVendor(ap.bssid);
+
         final response = await ApiService().uploadScan(
           ssid: ap.ssid,
           macAddress: ap.bssid,
-          encryptionType: ap.capabilities.contains('WPA') ? 'WPA2' :
-                         ap.capabilities.contains('WEP') ? 'WEP' : 'Open',
+          vendor: vendor,
+          encryptionType: encryptionType,
           signalStrength: ap.level,
           latitude: position.latitude,
           longitude: position.longitude,
@@ -122,10 +135,15 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
           'ssid': ap.ssid,
           'bssid': ap.bssid,
           'status': isThreat ? 'threat' : 'safe',
-          'encryption': ap.capabilities.contains('WPA') ? 'WPA2' :
-                       ap.capabilities.contains('WEP') ? 'WEP' : 'Open',
+          'vendor': vendor,
+          'threat_type': response['threat_type'] ?? 'UNKNOWN',
+          'analysis': response['alert'] ?? response['message'] ?? '',
+          'ai_score': response['ai_score'] ?? 0,
+          'encryption': encryptionType,
           'signal_strength': ap.level,
           'frequency': ap.frequency,
+          'location': locationString,
+          'timestamp': timestampString,
         });
       }
 
@@ -143,6 +161,8 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
         _threatDetected = threatsDetected > 0 || nearbyThreats.isNotEmpty;
         _networksFound = results.length;
         _scanResults = results;
+        _scanLocation = locationString;
+        _scanTimestamp = timestampString;
       });
 
       if (nearbyThreats.isNotEmpty) {
@@ -201,6 +221,41 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
     }
   }
 
+  String _parseEncryption(String capabilities) {
+    final caps = capabilities.toUpperCase();
+    if (caps.contains('WPA3')) return 'WPA3';
+    if (caps.contains('WPA2')) return 'WPA2';
+    if (caps.contains('WPA')) return 'WPA';
+    if (caps.contains('WEP')) return 'WEP';
+    return 'OPEN';
+  }
+
+  String _resolveVendor(String? mac) {
+    if (mac == null || mac.isEmpty) return 'Unknown';
+    final prefix = mac.toUpperCase().replaceAll('-', ':');
+    final oui = prefix.length >= 8 ? prefix.substring(0, 8) : prefix;
+    const vendorMap = {
+      '00:0A:95': 'Apple',
+      '00:14:22': 'Dell',
+      '00:40:96': 'Cisco',
+      '00:1A:70': 'Apple',
+      '00:26:5E': 'Apple',
+      '00:50:F4': 'Linksys',
+      '00:1F:E2': 'Ubiquiti',
+      '00:17:3F': 'Netgear',
+      '00:22:B0': 'TP-Link',
+      '00:25:86': 'TP-Link',
+      '00:1D:7E': 'Asus',
+      '00:19:DB': 'Asus',
+      '00:12:17': 'NETGEAR',
+      '00:06:5B': 'Netgate',
+      '00:04:9F': 'Cisco',
+      '00:60:B0': 'Cisco',
+      '00:0C:F6': 'Linksys',
+    };
+    return vendorMap[oui] ?? 'Unknown';
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusText = _isScanning
@@ -257,7 +312,29 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               const SizedBox(height: 16),
               if (_backgroundScanningEnabled)
                 _buildBackgroundScanningToggle(),
-              const SizedBox(height: 26),
+              const SizedBox(height: 18),
+              if (_scanComplete)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 18),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceAlt,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppTheme.cardBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Last scan location', style: GoogleFonts.spaceGrotesk(color: AppTheme.textSecondary, fontSize: 12)),
+                      const SizedBox(height: 4),
+                      Text(_scanLocation, style: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.accentNavy)),
+                      const SizedBox(height: 10),
+                      Text('Scanned at: $_scanTimestamp', style: GoogleFonts.jetBrainsMono(fontSize: 12, color: AppTheme.textSecondary)),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 8),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 400),
                 curve: Curves.easeOut,
@@ -389,9 +466,11 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   Widget _buildResultRow(Map<String, dynamic> result) {
     final status = result['status']?.toString() ?? 'safe';
     final isThreat = status.toLowerCase() == 'threat';
-    final signalStrength = result['signal_strength']?.toString() ?? '--';
+    final signalStrength = int.tryParse(result['signal_strength']?.toString() ?? '') ?? -100;
+    final aiScore = result['ai_score'] ?? 0;
     final dotColor = isThreat ? AppTheme.threatRed : AppTheme.safeGreen;
     final pillText = isThreat ? 'THREAT' : 'SAFE';
+    final signalBars = ((signalStrength + 100) / 25).clamp(0, 4).toInt();
 
     return Container(
       margin: const EdgeInsets.only(top: 14),
@@ -420,13 +499,19 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
             ],
           ),
           const SizedBox(height: 12),
+          Text('Vendor: ${result['vendor'] ?? 'Unknown'}', style: GoogleFonts.jetBrainsMono(color: AppTheme.textSecondary, fontSize: 12)),
+          const SizedBox(height: 8),
+          Text('Threat: ${result['threat_type'] ?? 'N/A'} | AI score: $aiScore', style: GoogleFonts.jetBrainsMono(color: AppTheme.textSecondary, fontSize: 12)),
+          const SizedBox(height: 8),
+          Text(result['analysis']?.toString() ?? '-', style: GoogleFonts.jetBrainsMono(color: AppTheme.textSecondary, fontSize: 12)),
+          const SizedBox(height: 12),
           Row(
             children: [
               Text(result['encryption']?.toString() ?? 'Unknown', style: GoogleFonts.jetBrainsMono(color: AppTheme.textSecondary, fontSize: 12)),
               const Spacer(),
               Row(
                 children: List.generate(4, (index) {
-                  final fill = index < (4 - ((signalStrength.contains('-') ? int.parse(signalStrength.replaceAll('-', '')) : 0) / 20).ceil());
+                  final fill = index < signalBars;
                   return Container(
                     width: 6,
                     height: 18,

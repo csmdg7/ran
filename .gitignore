@@ -1,0 +1,48 @@
+﻿# Net-Fence AI
+
+# Ignore Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.sqlite
+backend/.env
+backend/.env.*
+venv/
+.venv/
+.env
+
+# Ignore Flutter / Dart build output
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+build/
+**/build/
+build_debug_log.txt
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.*
+**/Flutter/Flutter.framework
+
+# Ignore Android build artifacts
+.gradle/
+local.properties
+**/build/
+**/app/build/
+*.keystore
+
+# Ignore Xcode / Mac
+DerivedData/
+ios/Pods/
+ios/Podfile.lock
+*.xcworkspace
+*.xcconfig
+
+# Misc
+.DS_Store
+.idea/
+*.iml

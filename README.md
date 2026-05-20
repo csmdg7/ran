@@ -1,329 +1,92 @@
-# 🛡️ Net-Fence AI
+﻿# Net-Fence AI
 
-**Intelligent Wi-Fi Threat Detection for Your Mobile Device**
+## Intelligent Wi-Fi Threat Detection for Mobile
 
-Net-Fence AI is a mobile security application that protects you from malicious Wi-Fi networks in real-time. Stay safe on public networks with AI-powered threat detection and instant alerts.
+Net-Fence AI is a cross-platform mobile security application designed to detect malicious Wi-Fi networks and alert users before they connect. The project includes a Flutter-based Android frontend and a Python Flask backend for analysis, real-time scanning, and map-based threat visualization.
 
----
+## Repository Structure
 
-## 🎯 What Is Net-Fence AI?
+- `frontend/` - Flutter application source
+  - `android/` - Android Gradle configuration and native integration
+  - `ios/`, `macos/`, `windows/`, `linux/` - platform folders
+  - `lib/` - Dart app logic, UI screens, services, and models
+- `backend/` - Python Flask API and machine learning inference
+  - `app.py` - backend entry point
+  - `routes/` - API endpoints for scan ingestion and threat queries
+  - `models/` - database and ML model helpers
+- `web_dashboard.html` - web-based dashboard demo for analytics and testing
+- `test_data_generator.py` - local test dataset generator
 
-Your smartphone connects to Wi-Fi networks everywhere—coffee shops, airports, hotels. But **not all networks are safe**.
+## Key Features
 
-Net-Fence AI acts as your **personal security guard**, continuously monitoring Wi-Fi networks around you and alerting you to potential threats before they can harm your device.
+- Real-time Wi-Fi threat scanning and analysis
+- Evil twin detection using SSID and MAC correlation
+- MAC spoofing detection with local admin / randomized address checks
+- Location-aware geofencing and threat zone alerts
+- Background scanning support for persistent protection
+- AI/ML anomaly detection for unknown Wi-Fi threats
+- Clean, modern dashboard and mobile user experience
 
-### Key Advantages
-✅ **Real-Time Protection** - Instant threat detection as you scan networks  
-✅ **Background Monitoring** - Automatic scanning even when app is closed  
-✅ **Location-Based Alerts** - Know where threats are on a live map  
-✅ **No Configuration Needed** - Works out of the box  
-✅ **Lightweight & Fast** - Minimal battery impact  
-✅ **Offline Processing** - Your data stays private  
+## Android App Build
 
----
+### Prerequisites
+- Flutter SDK installed and configured
+- Android SDK installed with API level 36
+- Java JDK 11 or newer
 
-## 📱 Features
+### Build Debug APK
 
-### **Dashboard**
-- Live threat statistics
-- Recent scan history
-- Network safety score
-- Quick access to all features
-
-### **Wi-Fi Scanner**
-- Scan available networks in your area
-- Individual threat analysis per network
-- Detailed threat information and recommendations
-- One-tap network blocking
-
-### **Threat Map**
-- Visual map of detected threats around you
-- Safe and unsafe zones
-- Geofence-based alerts
-- Historical threat data
-
-### **Background Protection**
-- Automatic periodic scanning
-- Silent threat detection
-- Push notifications for critical threats
-- Battery-optimized scanning
-
-### **Alert System**
-- Instant notifications for threats
-- Different alert levels (Critical, High, Medium, Low)
-- Customizable alert preferences
-- Threat history log
-
----
-
-## 🚀 Quick Start
-
-### **Installation**
-
-1. **Download APK**
-   ```
-   Get the latest APK from releases or build from source
-   ```
-
-2. **Install on Android Phone**
-   ```
-   adb install app-release.apk
-   ```
-   Or: Settings → Install from Unknown Sources → Select APK
-
-3. **Grant Permissions**
-   - Location (required for geofencing)
-   - Wi-Fi access (required for scanning)
-   - Notifications (required for alerts)
-   - Background permissions (for background scanning)
-
-4. **Launch App**
-   - First launch shows splash screen
-   - Accept all permission requests
-   - App is ready to use
-
-### **First Scan**
-
-1. Open **Scanner** tab
-2. Tap "Start Scan"
-3. Wait for network detection (10-30 seconds)
-4. Review results and threat alerts
-5. See threats on map if desired
-
----
-
-## 🔐 Security & Privacy
-
-- **No Account Required** - 100% anonymous usage
-- **No Data Collection** - Scans processed locally
-- **No Cloud Upload** - All analysis happens on your device
-- **Open Source** - Code is transparent and verifiable
-- **Encrypted Storage** - Local threat database is secure
-
----
-
-## 🎮 How to Use
-
-### **Dashboard Screen**
-Monitor overall security metrics at a glance:
-- Total networks scanned
-- Threats detected
-- Last scan timestamp
-- Safe network percentage
-
-### **Scanner Screen**
-Manually scan for threats:
-1. Tap "Scan Now" button
-2. App detects nearby networks
-3. Each network is analyzed
-4. Results show threat level
-5. Tap any result for details
-
-### **Map Screen**
-Visualize threat locations:
-- Red zones = Detected threats
-- Green zones = Safe networks
-- Zoom in/out for details
-- Geofences auto-alert when entering threat zones
-
-### **Threats Screen**
-Review all detected threats:
-- Complete threat history
-- Threat type and severity
-- Location information
-- Timestamps
-- Recommended actions
-
----
-
-## ⚙️ System Requirements
-
-**Android:**
-- Android 5.0+ (API 21+)
-- 50MB free storage
-- Location services enabled
-- Wi-Fi capability
-
-**Network:**
-- Internet connection (for backend processing)
-- Same Wi-Fi network as backend (for local development)
-
----
-
-## 🔧 Configuration
-
-### **Backend Setup** (Local Development Only)
-
-1. **Install Python 3.8+**
-   ```bash
-   python --version
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   cd backend
-   pip install -r requirements.txt
-   ```
-
-3. **Run Backend Server**
-   ```bash
-   python app.py
-   # or for production:
-   gunicorn -w 4 -b 0.0.0.0:5000 app:app
-   ```
-
-4. **Configure Backend URL in App**
-   - Open settings in app
-   - Set backend server IP address
-   - Ensure phone can reach the IP
-
-5. **Test Connection**
-   ```bash
-   curl http://[YOUR_IP]:5000/health
-   # Response: {"status": "ok"}
-   ```
-
----
-
-## 📊 Understanding Threat Levels
-
-| Level | Description | Action |
-|-------|-------------|--------|
-| 🟢 **Low** | Safe network | Connect normally |
-| 🟡 **Medium** | Potentially unsafe | Use with caution |
-| 🔴 **High** | Dangerous network | Avoid connecting |
-| ⚫ **Critical** | Known malicious | Block immediately |
-
----
-
-## 🛠️ Building from Source
-
-### **Prerequisites**
-- Flutter 3.19+
-- Android SDK (API 21+)
-- Dart SDK
-- Git
-
-### **Build Debug APK**
-```bash
+```powershell
 cd frontend
 flutter clean
 flutter pub get
 flutter build apk --debug
-# Output: build/app/outputs/flutter-apk/app-debug.apk
 ```
 
-### **Build Release APK**
-```bash
-cd frontend
-flutter build apk --release
-# Output: build/app/outputs/flutter-apk/app-release.apk
+The generated APK is available at:
+
+```text
+frontend\build\app\outputs\flutter-apk\app-debug.apk
 ```
 
-### **Install & Run**
-```bash
-flutter run --debug
-# or
-adb install build/app/outputs/flutter-apk/app-debug.apk
+## Backend Setup
+
+### Prerequisites
+- Python 3.8+
+- Virtual environment support
+
+### Run Backend
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python app.py
 ```
 
----
+The backend server exposes the API on `http://127.0.0.1:5000` by default.
 
-## 📋 Features Status
+## How It Works
 
-| Feature | Status | Details |
-|---------|--------|---------|
-| Real-time Wi-Fi Scanning | ✅ | Instant threat detection |
-| Live Threat Mapping | ✅ | OpenStreetMap integration |
-| Background Scanning | ✅ | Periodic automatic checks |
-| Geofence Alerts | ✅ | Location-based notifications |
-| Push Notifications | ✅ | Real-time threat alerts |
-| Threat History | ✅ | Local database storage |
-| Statistics Dashboard | ✅ | Comprehensive stats |
-| Multi-Network Analysis | ✅ | Scan multiple networks |
+1. The Flutter app scans nearby Wi-Fi networks using native platform plugins.
+2. Each network is analyzed for encryption type, signal strength, and MAC properties.
+3. The backend applies rule-based checks and ML anomaly detection.
+4. Threats are recorded and displayed on the mobile dashboard and map.
+5. Users receive immediate alerts for high-risk networks.
 
----
+## Notes
 
-## 🐛 Troubleshooting
+- Current Android compile SDK is set to 36 for plugin compatibility.
+- The project uses local processing to keep user data private.
+- The app target is Android; the repository includes example desktop platform folders for Flutter compatibility.
 
-### **"Backend Offline" Error**
-- Verify backend server is running
-- Check backend IP configuration
-- Ensure phone is on same network (local dev)
-- Try restarting backend
+## Commit & Push
 
-### **Permissions Not Working**
-- Go to: Settings → Apps → Net-Fence AI → Permissions
-- Grant all requested permissions
-- Restart app
+This repo is connected to:
 
-### **Empty Scan Results**
-- Ensure Wi-Fi is enabled
-- Check location permission is granted
-- Move to an area with more networks
-- Wait 5-10 seconds and rescan
+`https://github.com/csmdg7/ran.git`
 
-### **Background Scanning Not Working**
-- Disable battery optimization for app
-- Check background permission is granted
-- Ensure location services enabled
-- Verify notification permission granted
+## Contact
 
-### **APK Won't Install**
-- Enable "Unknown Sources" in settings
-- Ensure device storage has 100MB+ free
-- Try uninstalling old version first
-- Use `adb install -r app.apk` to reinstall
-
----
-
-## 📞 Support & Feedback
-
-- **Report Issues:** Open an issue on the repository
-- **Suggest Features:** Submit feature requests
-- **Security Concerns:** Report vulnerabilities responsibly
-
----
-
-## 📜 License
-
-Net-Fence AI is provided as-is for security research and personal use.
-
----
-
-## 🎓 What Makes Net-Fence AI Different?
-
-Unlike traditional VPNs or network apps:
-- **Intelligent Detection** - Not just blocking known threats
-- **Proactive Protection** - Detects anomalies before damage
-- **User-Friendly** - Complex security made simple
-- **Privacy-First** - No data collection or cloud sync
-- **Fast & Lightweight** - Minimal resource usage
-
----
-
-## 🚀 Roadmap
-
-Future enhancements:
-- [ ] iOS support
-- [ ] Custom threat rules
-- [ ] Advanced reporting dashboard
-- [ ] Multi-device sync
-- [ ] VPN integration
-- [ ] Automated blocking
-
----
-
-## 📈 Performance Metrics
-
-- **Scan Time:** 10-30 seconds per session
-- **Accuracy:** 95%+ threat detection rate
-- **Battery Impact:** <2% per hour background scanning
-- **Storage:** 5-50MB depending on history
-- **Memory:** 40-80MB active RAM
-
----
-
-**Safe Connecting Starts Here 🛡️**
-
-*Last Updated: April 30, 2026 | Version 1.0.0*
+For development or deployment questions, review the `frontend` and `backend` folders for implementation details.

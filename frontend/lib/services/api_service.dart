@@ -12,8 +12,9 @@ class ApiService {
   factory ApiService() => _instance;
 
   // Configure these for your environment
-  static const String DEFAULT_BACKEND_URL = 'http://10.235.58.202:5000';
-  static const String LOCALHOST_URL = 'http://localhost:5000';
+  static const String DEFAULT_BACKEND_URL = 'http://10.0.2.2:5000';
+  static const String LOCALHOST_URL = 'http://127.0.0.1:5000';
+  static const String MOBILE_BACKEND_URL = 'http://10.157.123.202:5000'; // Replace with your laptop IP for a real Android device
   static const String PRODUCTION_URL = 'http://api.netfence.local:5000'; // Update with your prod URL
 
   String get baseUrl {
@@ -22,13 +23,18 @@ class ApiService {
     if (envUrl.isNotEmpty) {
       return envUrl;
     }
+
+    if (_customUrl?.isNotEmpty == true) {
+      return _customUrl!;
+    }
     
     if (kIsWeb) {
       return LOCALHOST_URL;
     }
     
-    // For Android/iOS, try to detect network environment
-    return DEFAULT_BACKEND_URL; // Change to PRODUCTION_URL when deploying
+    // For Android/iOS devices, use the laptop IP for physical testing.
+    // If you want to force emulator behavior, set BACKEND_URL via --dart-define.
+    return MOBILE_BACKEND_URL;
   }
 
   /// Set custom backend URL for testing or multi-environment support
@@ -129,11 +135,13 @@ class ApiService {
     required int signalStrength,
     required double latitude,
     required double longitude,
+    String vendor = 'Unknown',
   }) async {
     final uri = Uri.parse('$baseUrl/api/scan');
     final payload = {
       'ssid': ssid,
       'mac_address': macAddress,
+      'vendor': vendor,
       'encryption_type': encryptionType,
       'signal_strength': signalStrength,
       'latitude': latitude,
