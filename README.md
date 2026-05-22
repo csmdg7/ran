@@ -1,31 +1,43 @@
-﻿# Net-Fence AI
+# NetFenceAI: Intelligent Wi-Fi Threat Detection for Mobile
 
-## Intelligent Wi-Fi Threat Detection for Mobile
+NetFenceAI is a functional, full-stack Proof-of-Concept (PoC) designed to detect, log, and visualize malicious wireless networks. It pairs a Flutter-based Android frontend with a local Python Flask backend to ingest real-time radio-frequency metrics and evaluate spatial threat signatures.
 
-Net-Fence AI is a cross-platform mobile security application designed to detect malicious Wi-Fi networks and alert users before they connect. The project includes a Flutter-based Android frontend and a Python Flask backend for analysis, real-time scanning, and map-based threat visualization.
+### **⚙️ Architecture & Data Flow**
 
-## Repository Structure
+```text
+[ Flutter App ] ───(HTTP JSON: SSID, BSSID, RSSI, GPS)───> [ Python Flask Backend ]
+       │                                                              │
+[ UI Map Updates ] <───(Threat Score Vector [0-10])───────────────────[ Processing Engine ]
 
-- `frontend/` - Flutter application source
-  - `android/` - Android Gradle configuration and native integration
-  - `ios/`, `macos/`, `windows/`, `linux/` - platform folders
-  - `lib/` - Dart app logic, UI screens, services, and models
-- `backend/` - Python Flask API and machine learning inference
-  - `app.py` - backend entry point
-  - `routes/` - API endpoints for scan ingestion and threat queries
-  - `models/` - database and ML model helpers
-- `web_dashboard.html` - web-based dashboard demo for analytics and testing
-- `test_data_generator.py` - local test dataset generator
+### **🛰️ Core Features**
+Real-time Metadata Extraction: Scans and extracts raw hardware-level Wi-Fi parameters (SSID, BSSID/MAC, RSSI dBm values, encryption flags) and GPS coordinate streams.
 
-## Key Features
+Dual-Layer Threat Scoring: * Primary: Deterministic rule-based engine (detects open networks, weak WEP encryption, MAC spoofing via 02: prefixes, and Evil Twins via SSID/MAC correlation).
 
-- Real-time Wi-Fi threat scanning and analysis
-- Evil twin detection using SSID and MAC correlation
-- MAC spoofing detection with local admin / randomized address checks
-- Location-aware threat scoring and alert logging
-- Background scanning support for persistent protection
-- AI/ML anomaly detection for unknown Wi-Fi threats
-- Map-based threat visualization with OpenStreetMap
+*Secondary: Optional Isolation Forest ML anomaly detection for behavioral pattern scoring.
+
+Spatial Threat Mapping: Renders visual danger vectors and coordinate intersections directly onto an interactive OpenStreetMap UI.
+
+Persistent Background Protection: Leverages WorkManager for continuous background scanning and pushes OS-level notifications for high-risk networks.
+
+Local Processing: Designed as an edge-computing PoC to keep spatial and network data localized and private.
+
+### **📁 Repository Structure**
+frontend/ - Flutter application source
+
+android/ - Android Gradle configuration and native integration
+
+lib/ - Dart app logic, UI screens, services, and models
+
+backend/ - Python Flask API and machine learning inference
+
+app.py - Backend entry point
+
+routes/ - API endpoints for scan ingestion and threat queries
+
+models/ - Database and ML model helpers
+
+test_data_generator.py - Local test dataset generator
 
 ## Android App Build
 
@@ -67,19 +79,12 @@ python app.py
 
 The backend server exposes the API on `http://127.0.0.1:5000` by default.
 
-## How It Works
+## 📝 Engineering Notes & Limitations
+Geofencing: Active perimeter-crossing background geofence alerts are currently disabled due to library deprecation. Threat zones are instead visually rendered via coordinate mapping on the dashboard.
 
-1. The Flutter app scans nearby Wi-Fi networks using native platform plugins.
-2. Each network is analyzed for encryption type, signal strength, and MAC properties.
-3. The backend applies rule-based checks and ML anomaly detection.
-4. Threats are recorded and displayed on the mobile dashboard and map.
-5. Users receive immediate alerts for high-risk networks.
+Android SDK: Current Android compile SDK is set to API 36 to ensure native plugin compatibility (wifi_scan, geolocator).
 
-## Notes
-
-- Current Android compile SDK is set to 36 for plugin compatibility.
-- The project uses local processing to keep user data private.
-- The app target is Android; the repository includes example desktop platform folders for Flutter compatibility.
+Environment: This is an edge-computing prototype designed to run locally. For enterprise deployment, the backend would require containerization (Docker) and cloud-hosted ML training pipelines.
 
 ## Commit & Push
 
