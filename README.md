@@ -22,10 +22,10 @@ Net-Fence AI is a cross-platform mobile security application designed to detect 
 - Real-time Wi-Fi threat scanning and analysis
 - Evil twin detection using SSID and MAC correlation
 - MAC spoofing detection with local admin / randomized address checks
-- Location-aware geofencing and threat zone alerts
+- Location-aware threat scoring and alert logging
 - Background scanning support for persistent protection
 - AI/ML anomaly detection for unknown Wi-Fi threats
-- Clean, modern dashboard and mobile user experience
+- Map-based threat visualization with OpenStreetMap
 
 ## Android App Build
 
@@ -85,7 +85,7 @@ The backend server exposes the API on `http://127.0.0.1:5000` by default.
 
 This repo is connected to:
 
-`https://github.com/csmdg7/ran.git`
+`https://github.com/csmdg7/NetFenceAI`
 
 ## Contact
 
