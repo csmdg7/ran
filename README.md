@@ -1,8 +1,8 @@
-﻿# Net-Fence AI
+﻿# NetFenceAI
 
-## Intelligent Wi-Fi Threat Detection for Mobile
+## Intelligent Network Intrusion Detection System — Advanced Wi‑Fi Threat Detection (IsolationForest ML fallback; PoC)
 
-Net-Fence AI is a cross-platform mobile security application designed to detect malicious Wi-Fi networks and alert users before they connect. The project includes a Flutter-based Android frontend and a Python Flask backend for analysis, real-time scanning, and map-based threat visualization.
+NetFenceAI is a cross-platform mobile security application designed to detect malicious Wi-Fi networks and alert users before they connect. The project includes a Flutter-based Android frontend and a Python Flask backend for analysis, real-time scanning, and map-based threat visualization.
 
 ## Repository Structure
 
